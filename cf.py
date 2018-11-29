@@ -29,17 +29,26 @@ logfile=open('7daylog.txt','a',encoding='utf-8')
 def getDetails(nl):
     
     pag=BeautifulSoup(scraper.get(nl).text, 'html.parser')
+    
     title=pag.find('h1').text
-    detailDate=pag.find('div',{'class':'story-detail-date'}).text
+    
+    detailDate=pag.find('div',{'class':'story-detail-date'})
+    if detailDate is not None:
+        detailDate=detailDate.text
+    else:
+        detailDate="No Date included!"
+        
     location=pag.find('div',{'class':'field field-name-field-ref-location field-type-node-reference field-label-hidden'})
     if location is not None:
         location=location.text
     else:
         location='no location'
+        
     if pag.find('div',{'class':'field field-name-field-ref-issue-no field-type-node-reference field-label-hidden'}) is not None:
         issueNo=pag.find('div',{'class':'field field-name-field-ref-issue-no field-type-node-reference field-label-hidden'}).text
     else:
         issueNo="No Issue No."
+        
     imgdata=pag.find('div',{'class':'story-photo-inner'})
     if imgdata.find('img',src=True) is not None and imgdata.find('div',{'class':'photo-caption'}).text is not None:
         imgLoc=imgdata.find('img',src=True)['src']
@@ -47,10 +56,12 @@ def getDetails(nl):
     else:
         imgLoc='No Image Included'
         photographer='No Photographer'
+        
     if pag.find('div',{'class':'field field-name-body field-type-text-with-summary field-label-hidden'}) is not None:
         body=pag.find('div',{'class':'field field-name-body field-type-text-with-summary field-label-hidden'}).text
     else:
         body="No News Body!"
+        
     resultList=[title,detailDate,location,issueNo,imgLoc,photographer,body]
     #f.write(nl+"\n"+title+'\n'+detailDate+'\n'+location+'\n'+issueNo+'\n'+imgLoc+'\n'+photographer+'\n'+body)
     writer.writerow(resultList)
@@ -64,7 +75,7 @@ soup=BeautifulSoup(scraper.get("http://www.7daydaily.com/news").text, 'html.pars
 #for urljoin(). I'm too lazy T_T
 aDomain="http://www.7daydaily.com"
 #flag is for scraping all pagers!
-flag=True
+#flag=True
 count=0
 #scrap first 25 pagers approx 500 news
 while count<25:
@@ -85,7 +96,7 @@ while count<25:
     count+=1
     print("Done")
 writer.close()
-logfile.close()
+f.close()
 f.close()
 
 
