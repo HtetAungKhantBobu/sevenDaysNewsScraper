@@ -14,8 +14,15 @@ scraper = cfscrape.create_scraper()
 ##    }
 
 ##please change file path >_<
-f=open('C:\\Users\\G4\\Desktop\\seno\\7dayCrwalRawData.csv','a',encoding='utf-8')
+f=open('7dayCrwalRawData.csv','a',encoding='utf-8')
 writer=csv.writer(f, delimiter=',', quotechar='"',quoting=csv.QUOTE_ALL, lineterminator='\n')
+
+logfile=open('7daylog.txt','r',encoding='utf-8')
+seen=set([i.rstrip() for i in logfile.readlines()])
+logfile.close()
+logfile=open('7daylog.txt','a',encoding='utf-8')
+
+
 
 ##download and save news data from news page */story/\d$
 
@@ -37,10 +44,16 @@ def getDetails(nl):
     else:
         imgLoc='No Image Included'
         photographer='No Photographer'
-    body=pag.find('div',{'class':'field field-name-body field-type-text-with-summary field-label-hidden'}).text
+    if pag.find('div',{'class':'field field-name-body field-type-text-with-summary field-label-hidden'}) is not None:
+        body=pag.find('div',{'class':'field field-name-body field-type-text-with-summary field-label-hidden'}).text
+    else:
+        body="No News Body!"
     resultList=[title,detailDate,location,issueNo,imgLoc,photographer,body]
     #f.write(nl+"\n"+title+'\n'+detailDate+'\n'+location+'\n'+issueNo+'\n'+imgLoc+'\n'+photographer+'\n'+body)
     writer.writerow(resultList)
+    #save the link in seen and cache
+    seen.add(nl)
+    logfile.write(nl+"\n")
 
 
 #please change to appropriate category link O_o 
@@ -57,13 +70,19 @@ while count<25:
     for i in newsTitle:
         at=i.find('a',href=True)['href']
         print("Downloading "+str(at))
-        getDetails(urljoin(aDomain,at))
+        nurl=urljoin(aDomain,at)
+        if nurl not in seen:
+            getDetails(nurl)
+        else:
+            print("Duplicate. Skipped!")
         time.sleep(3)
         print("Done")
     nextLink=soup.find('li',{'class':'pager-next'}).find('a',href=True)['href']
     soup=BeautifulSoup(scraper.get(urljoin(aDomain,nextLink)).text, 'html.parser')
     count+=1
     print("Done")
+writer.close()
+logfile.close()
 f.close()
 
 
