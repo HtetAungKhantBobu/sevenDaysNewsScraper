@@ -36,7 +36,8 @@ def getDetails(nl):
         location=location.text
     else:
         location='no location'
-    issueNo=pag.find('div',{'class':'field field-name-field-ref-issue-no field-type-node-reference field-label-hidden'}).text
+    if pag.find('div',{'class':'field field-name-field-ref-issue-no field-type-node-reference field-label-hidden'}) is not None:
+        issueNo=pag.find('div',{'class':'field field-name-field-ref-issue-no field-type-node-reference field-label-hidden'}).text
     imgdata=pag.find('div',{'class':'story-photo-inner'})
     if imgdata.find('img',src=True) is not None and imgdata.find('div',{'class':'photo-caption'}).text is not None:
         imgLoc=imgdata.find('img',src=True)['src']
